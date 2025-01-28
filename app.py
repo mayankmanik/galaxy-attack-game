@@ -5,14 +5,22 @@ import pygame
 
 #  initialise pygame
 pygame.init()
+# initialise sound
+pygame.mixer.init()
 
 #  create screen
 screen = pygame.display.set_mode((800, 600))
+bg_image = pygame.image.load('background-image.jpg')
+bg_imageX = 0
+bg_imageY = 0
 
 #  title icon
 pygame.display.set_caption("Galaxy Attack")
 icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
+
+# bullet-sound
+bullet_sound = pygame.mixer.Sound('bullet-sound.wav')
 
 # player
 playerImg = pygame.image.load('player.png')
@@ -32,7 +40,7 @@ for i in range(num_of_enemy):
     enemyImg.append(pygame.image.load('enemy.png'))
     enemyX.append(random.randint(0, 730))
     enemyY.append(random.randint(30, 130))
-    enemyX_change.append(0.3)
+    enemyX_change.append(0.5)
     enemyY_change.append(30)
 
 # bullet
@@ -40,7 +48,7 @@ bulletImg = pygame.image.load('bullet.png')
 bulletX = 0
 bulletY = 480
 bulletX_change = 0
-bulletY_change = 0.8
+bulletY_change = 1.8
 bullet_state = "ready"  # ready state : we cant see bullet. fire state : bullet is moving
 
 # score
@@ -50,6 +58,11 @@ textX = 10
 textY = 10
 
 over_text = pygame.font.Font('freesansbold.ttf', 60)
+
+
+def bg(x, y):
+    screen.blit(bg_image, (x, y))
+
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -62,31 +75,34 @@ def enemy(x, y, i):
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
+    bullet_sound.play()
     screen.blit(bulletImg, (x+16, y+10))
 
 
 def is_Collision(enemyX, enemyY, bulletX, bulletY):
     distance = math.sqrt(math.pow(enemyX-bulletX, 2) +
                          math.pow(enemyY-bulletY, 2))
-    if(distance < 27):
+    if (distance < 27):
         return True
     else:
         return False
+
 
 def showScore(x, y):
     score_val = font.render("Score : " + str(score), True, (255, 0, 0))
     screen.blit(score_val, (x, y))
 
+
 def gameOver():
     over_font = over_text.render("GAME OVER", True, (255, 0, 0))
-    screen.blit(over_font, (220,250))
-
+    screen.blit(over_font, (220, 250))
 
 
 #  game loop
 running = True
 while running:
     screen.fill((0, 0, 0))
+    bg(0, 0)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -131,7 +147,7 @@ while running:
 
         # collision
         collision = is_Collision(enemyX[i], enemyY[i], bulletX, bulletY)
-        if(collision):
+        if (collision):
             bulletY = 480
             bullet_state = "ready"
             score += 1
